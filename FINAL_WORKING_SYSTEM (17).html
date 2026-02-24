@@ -1,0 +1,2248 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Warehouse Management</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+    .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .login-card { background: white; padding: 50px 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 450px; width: 100%; }
+    .login-card h2 { font-size: 2rem; margin-bottom: 10px; color: #333; text-align: center; }
+    .login-card .subtitle { color: #666; text-align: center; margin-bottom: 40px; font-size: 1rem; }
+    .form-group { margin-bottom: 25px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 1rem; }
+    .form-group select, .form-group input { width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: all 0.3s; }
+    .form-group select:focus, .form-group input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
+    .login-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s; }
+    .login-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102,126,234,0.3); }
+    #departmentGroup { display: none; }
+    .main-app { display: none; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+    .header h1 { font-size: 1.5rem; font-weight: 700; }
+    .user-badge { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 10px; }
+    .logout-btn { padding: 10px 20px; background: rgba(255,255,255,0.3); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+    .logout-btn:hover { background: rgba(255,255,255,0.4); }
+    .container { max-width: 1400px; margin: 0 auto; padding: 30px 20px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .stat-box { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); transition: transform 0.2s; }
+    .stat-box:hover { transform: translateY(-5px); box-shadow: 0 5px 20px rgba(0,0,0,0.15); }
+    .stat-label { font-size: 0.85rem; color: #666; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+    .stat-value { font-size: 2.5rem; font-weight: 800; margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 25px; background: white; padding: 10px; border-radius: 15px; overflow-x: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+    .tab { padding: 12px 24px; background: none; border: none; border-radius: 10px; cursor: pointer; font-size: 1rem; white-space: nowrap; font-weight: 600; color: #666; transition: all 0.2s; }
+    .tab:hover { background: #f0f0f0; }
+    .tab.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 25px; }
+    .card h2 { margin-bottom: 20px; color: #333; font-size: 1.75rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+    th { background: #f8f9fa; font-weight: 700; color: #333; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; }
+    tbody tr:hover { background: #f8f9fa; }
+    .btn-primary { padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.2s; margin-right: 10px; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.3); }
+    .btn-success { padding: 8px 16px; background: #10B981; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; margin-right: 5px; }
+    .btn-danger { padding: 8px 16px; background: #EF4444; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+    .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+    .badge-success { background: #d1fae5; color: #065f46; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+    .item-row { padding: 15px; background: #f8f9fa; margin: 10px 0; border-radius: 10px; display: flex; align-items: center; gap: 15px; }
+    .item-row input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; }
+    .item-row label { flex: 1; cursor: pointer; }
+    .item-row input[type="number"] { width: 120px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; }
+    .alert { padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; font-weight: 500; }
+    .alert-success { background: #d1fae5; color: #065f46; border-left: 4px solid #10B981; }
+    .alert-warning { background: #fef3c7; color: #92400e; border-left: 4px solid #F59E0B; }
+    .alert-danger { background: #fee2e2; color: #991b1b; border-left: 4px solid #EF4444; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; }
+    .modal.show { display: flex; }
+    .modal-content { background: white; padding: 40px; border-radius: 20px; max-width: 1000px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .close-btn { background: none; border: none; font-size: 32px; cursor: pointer; color: #999; line-height: 1; }
+    .form-group-inline { margin-bottom: 15px; }
+    .form-group-inline label { display: block; margin-bottom: 5px; font-weight: 600; }
+    .form-group-inline input, .form-group-inline select, textarea { width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+    .filter-bar { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-bar input, .filter-bar select { padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; }
+    .notification { position: fixed; top: 20px; right: 20px; background: #EF4444; color: white; padding: 20px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 2000; display: none; }
+    .notification.show { display: block; animation: slideIn 0.3s; }
+    @keyframes slideIn { from { transform: translateX(400px); } to { transform: translateX(0); } }
+    .timeline { display: flex; gap: 20px; margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 10px; }
+    .timeline-item { flex: 1; text-align: center; padding: 15px; background: white; border-radius: 8px; }
+    .timeline-item.completed { background: #d1fae5; color: #065f46; }
+    @media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } .timeline { flex-direction: column; } }
+  </style>
+</head>
+
+<body>
+
+  <!-- Login Screen -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <h2>Warehouse Login</h2>
+      <p class="subtitle">Select your role to access the system</p>
+
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>User Role</label>
+          <select id="roleSelect" required>
+            <option value="">Select Role</option>
+            <option value="warehouse_manager">Warehouse Manager</option>
+            <option value="direct_manager">Direct Manager</option>
+            <option value="requester">Requester</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="departmentGroup">
+          <label>Department</label>
+          <select id="departmentSelect">
+            <option value="">Select Department</option>
+            <option value="DS Operations">DS Operations</option>
+            <option value="Mall Operations">Mall Operations</option>
+            <option value="Retail">Retail</option>
+            <option value="Customer Service">Customer Service</option>
+            <option value="Accounting">Accounting</option>
+            <option value="Floor 1">Floor 1</option>
+            <option value="Floor 2">Floor 2</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" id="nameInput" placeholder="Enter your full name" required />
+        </div>
+
+        <button type="submit" class="login-btn">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="mainApp" class="main-app">
+    <div class="header">
+      <div class="header-content">
+        <h1>🏭 Smart Warehouse Management</h1>
+        <div class="user-badge">
+          <div>
+            <div id="userName" style="font-weight: 700; font-size: 1.1rem;"></div>
+            <div id="userRole" style="font-size: 0.85rem; opacity: 0.9;"></div>
+          </div>
+          <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div id="notification" class="notification"></div>
+      <div class="stats" id="statsGrid"></div>
+      <div class="tabs" id="tabsNav"></div>
+      <div id="content"></div>
+    </div>
+  </div>
+
+  <!-- Review Modal -->
+  <div id="reviewModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Review & Adjust Request</h2>
+        <button class="close-btn" onclick="closeModal('reviewModal')">&times;</button>
+      </div>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- Reject Modal -->
+  <div id="rejectModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Reject Items</h2>
+        <button class="close-btn" onclick="closeModal('rejectModal')">&times;</button>
+      </div>
+      <div id="rejectContent"></div>
+    </div>
+  </div>
+
+  <!-- View Details Modal -->
+  <div id="detailsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Request Details</h2>
+        <button class="close-btn" onclick="closeModal('detailsModal')">&times;</button>
+      </div>
+      <div id="detailsContent"></div>
+    </div>
+  </div>
+
+  <script>
+    // ✅ IMPORTANT: paste your web app URL here
+    const API_URL = "https://script.google.com/macros/s/AKfycbwgaqKozgyFEVCk20ni3rdO4u044S7LUvMWche3--WZL_7tC0mC3ePlDMGZfu7rMwVC4A/exec";
+
+    async function sendToGoogleSheets(action, payload) {
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" }, // avoid preflight
+          body: JSON.stringify({ action, ...payload })
+        });
+
+        const text = await res.text();
+        const json = JSON.parse(text);
+        console.log("API response:", json);
+        return json && json.ok === true;
+      } catch (err) {
+        console.error("Google Sheets send error:", err);
+        return false;
+      }
+    }
+
+    let currentUser = null;
+    let currentTab = "";
+    let requests = [];
+    let requestCounter = 1000;
+    let outOfStockHistory = [];
+    let selectedYear = new Date().getFullYear(); // Current year by default
+    let filterFromDate = null; // Custom date range - from
+    let filterToDate = null;   // Custom date range - to
+
+    // 🔐 SESSION STORAGE for multi-tab support
+    // Each tab can have different user logged in
+    // But all tabs share the same data (localStorage)
+    
+    function loadCurrentUser() {
+      const savedUser = sessionStorage.getItem('currentUser');
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        console.log('✓ Loaded user from session:', currentUser.name, '-', currentUser.role);
+      }
+    }
+
+    function saveCurrentUser() {
+      if (currentUser) {
+        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+        console.log('✓ Saved user to session:', currentUser.name);
+      } else {
+        sessionStorage.removeItem('currentUser');
+        console.log('✓ Cleared user from session');
+      }
+    }
+
+    // Default demo inventory
+    const defaultInventory = [
+      { id: 1, name: "Tissue Paper (Papier Soie)", code: "TIS-001", category: "Packaging", qty: 50, min: 100, loc: "Shelf A1", price: 0.50, outOfStockSince: null },
+      { id: 2, name: "Carton Bags - Small", code: "BAG-001", category: "Packaging", qty: 200, min: 150, loc: "Shelf A2", price: 0.25, outOfStockSince: null },
+      { id: 3, name: "Gift Card Packaging", code: "GCP-001", category: "Gift Cards", qty: 30, min: 50, loc: "Shelf B1", price: 1.50, outOfStockSince: null },
+      { id: 4, name: "Ballpoint Pens - Blue", code: "PEN-001", category: "Office Supplies", qty: 100, min: 50, loc: "Shelf C1", price: 0.30, outOfStockSince: null },
+      { id: 5, name: "A4 Paper (500 sheets)", code: "PAP-001", category: "Office Supplies", qty: 10, min: 20, loc: "Shelf C2", price: 4.00, outOfStockSince: null },
+      { id: 6, name: "Hand Sanitizer", code: "SAN-001", category: "Cleaning", qty: 0, min: 10, loc: "Shelf D1", price: 2.50, outOfStockSince: new Date().toISOString() },
+      { id: 7, name: "Gift Card Printers", code: "GCP-002", category: "Gift Cards", qty: 3, min: 5, loc: "Shelf B2", price: 150.00, outOfStockSince: null }
+    ];
+
+    let inventory = [];
+
+    // 💾 LOAD DATA FROM LOCALSTORAGE
+    function loadData() {
+      try {
+        const savedInventory = localStorage.getItem('warehouseInventory');
+        const savedRequests = localStorage.getItem('warehouseRequests');
+        const savedCounter = localStorage.getItem('warehouseCounter');
+        const savedHistory = localStorage.getItem('warehouseHistory');
+        
+        if (savedInventory) {
+          inventory = JSON.parse(savedInventory);
+          console.log('✓ Loaded inventory from storage:', inventory.length, 'items');
+        } else {
+          inventory = JSON.parse(JSON.stringify(defaultInventory));
+          console.log('✓ Using default inventory');
+        }
+        
+        if (savedRequests) {
+          requests = JSON.parse(savedRequests);
+          console.log('✓ Loaded requests from storage:', requests.length, 'requests');
+        }
+        
+        if (savedCounter) {
+          requestCounter = parseInt(savedCounter);
+        }
+        
+        if (savedHistory) {
+          outOfStockHistory = JSON.parse(savedHistory);
+        }
+      } catch (err) {
+        console.error('Error loading data:', err);
+        inventory = JSON.parse(JSON.stringify(defaultInventory));
+      }
+    }
+
+    // 💾 SAVE DATA TO LOCALSTORAGE
+    function saveData() {
+      try {
+        localStorage.setItem('warehouseInventory', JSON.stringify(inventory));
+        localStorage.setItem('warehouseRequests', JSON.stringify(requests));
+        localStorage.setItem('warehouseCounter', requestCounter.toString());
+        localStorage.setItem('warehouseHistory', JSON.stringify(outOfStockHistory));
+        console.log('✓ Data saved to storage');
+        console.log('Current inventory:', inventory.map(i => i.name + ': ' + i.qty).join(', '));
+      } catch (err) {
+        console.error('Error saving data:', err);
+      }
+    }
+
+    // 🔄 SYNC DATA ACROSS TABS (real-time)
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'warehouseInventory' || e.key === 'warehouseRequests') {
+        console.log('🔄 Data changed in another tab - reloading...');
+        loadData();
+        if (currentUser) {
+          renderApp();
+        }
+      }
+    });
+
+    // 📤 EXPORT DATA (Download backup)
+    function exportAllData() {
+      const allData = {
+        inventory: inventory,
+        requests: requests,
+        requestCounter: requestCounter,
+        outOfStockHistory: outOfStockHistory,
+        exportDate: new Date().toISOString(),
+        version: "1.0"
+      };
+      
+      const dataStr = JSON.stringify(allData, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Warehouse_Backup_' + new Date().toISOString().split('T')[0] + '.json';
+      a.click();
+      window.URL.revokeObjectURL(url);
+      
+      alert('✓ Data exported successfully!\n\nFile saved: ' + a.download + '\n\nYou can import this file on another device.');
+    }
+
+    // 📥 IMPORT DATA (Load backup)
+    function importAllData() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      
+      input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          try {
+            const importedData = JSON.parse(event.target.result);
+            
+            // Validate data
+            if (!importedData.inventory || !importedData.requests) {
+              alert('❌ Invalid backup file format!');
+              return;
+            }
+            
+            // Confirm import
+            if (!confirm('⚠️ IMPORT DATA\n\n' +
+                        'This will REPLACE all current data with:\n\n' +
+                        '• ' + importedData.inventory.length + ' inventory items\n' +
+                        '• ' + importedData.requests.length + ' requests\n' +
+                        '• Export date: ' + new Date(importedData.exportDate).toLocaleString() + '\n\n' +
+                        'Continue?')) {
+              return;
+            }
+            
+            // Import data
+            inventory = importedData.inventory;
+            requests = importedData.requests;
+            requestCounter = importedData.requestCounter || 1000;
+            outOfStockHistory = importedData.outOfStockHistory || [];
+            
+            // Save to localStorage
+            saveData();
+            
+            // Refresh display
+            if (currentUser) {
+              renderApp();
+            }
+            
+            alert('✓ Data imported successfully!\n\n' +
+                  '✓ ' + inventory.length + ' inventory items loaded\n' +
+                  '✓ ' + requests.length + ' requests loaded\n\n' +
+                  'All data has been saved to this device.');
+                  
+          } catch (err) {
+            alert('❌ Error importing file!\n\n' + err.message);
+            console.error('Import error:', err);
+          }
+        };
+        
+        reader.readAsText(file);
+      };
+      
+      input.click();
+    }
+
+    // 🗑️ RESET DATA (if needed)
+    function resetAllData() {
+      if (confirm('⚠️ WARNING: This will delete ALL data and reset to defaults!\n\nAre you absolutely sure?')) {
+        if (confirm('This action CANNOT be undone. Continue?')) {
+          localStorage.removeItem('warehouseInventory');
+          localStorage.removeItem('warehouseRequests');
+          localStorage.removeItem('warehouseCounter');
+          localStorage.removeItem('warehouseHistory');
+          inventory = JSON.parse(JSON.stringify(defaultInventory));
+          requests = [];
+          requestCounter = 1000;
+          outOfStockHistory = [];
+          saveData();
+          alert('✓ All data has been reset to defaults!');
+          renderApp();
+        }
+      }
+    }
+
+    // 📥 EXPORT ALL DATA (for backup and transfer between devices)
+    function exportAllData() {
+      const exportData = {
+        version: '1.0',
+        exportDate: new Date().toISOString(),
+        inventory: inventory,
+        requests: requests,
+        requestCounter: requestCounter,
+        outOfStockHistory: outOfStockHistory
+      };
+      
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      
+      const filename = `Warehouse_Backup_${new Date().toISOString().split('T')[0]}_${new Date().getTime()}.json`;
+      a.href = url;
+      a.download = filename;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      
+      alert(`✓ Data exported successfully!\n\nFile: ${filename}\n\nUse this file to:\n• Backup your data\n• Transfer to another device\n• Share with team members`);
+    }
+
+    // 📤 IMPORT DATA (restore from backup)
+    // 📅 DATE/TIME PICKER
+    function showDateTimePicker() {
+      const now = new Date();
+      const dateValue = now.toISOString().split('T')[0];
+      const timeValue = now.toTimeString().slice(0, 5);
+      
+      const html = `
+        <h3>📅 Set Current Date & Time</h3>
+        <p style="color: #6B7280; margin-bottom: 20px;">
+          Set the system date and time. This is useful for backdating entries or simulations.
+        </p>
+        
+        <div style="background: #F3F4F6; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: 600; margin-bottom: 8px;">📅 Date:</label>
+            <input type="date" id="systemDate" value="${dateValue}" style="width: 100%; padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; font-size: 16px;">
+          </div>
+          
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 8px;">🕐 Time:</label>
+            <input type="time" id="systemTime" value="${timeValue}" style="width: 100%; padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; font-size: 16px;">
+          </div>
+        </div>
+        
+        <div style="background: #FEF3C7; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <strong>ℹ️ Note:</strong> This only changes the displayed date/time. 
+          Actual request timestamps will still use real dates.
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+          <button onclick="setSystemDateTime()" class="btn-primary" style="flex: 1;">
+            ✓ Set Date & Time
+          </button>
+          <button onclick="resetToCurrentDateTime()" style="flex: 1; padding: 10px; background: #10B981; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            🔄 Reset to Now
+          </button>
+          <button onclick="closeModal('detailsModal')" style="flex: 1; padding: 10px; background: #6B7280; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Cancel
+          </button>
+        </div>
+      `;
+      
+      document.getElementById('detailsContent').innerHTML = html;
+      document.getElementById('detailsModal').classList.add('show');
+    }
+    
+    function setSystemDateTime() {
+      const date = document.getElementById('systemDate').value;
+      const time = document.getElementById('systemTime').value;
+      
+      if (!date || !time) {
+        alert('Please select both date and time');
+        return;
+      }
+      
+      const selectedDateTime = new Date(`${date}T${time}`);
+      localStorage.setItem('systemDateTime', selectedDateTime.toISOString());
+      
+      closeModal('detailsModal');
+      renderApp();
+      
+      alert(`✓ Date & Time Updated!\n\n${selectedDateTime.toLocaleString()}`);
+    }
+    
+    function resetToCurrentDateTime() {
+      localStorage.removeItem('systemDateTime');
+      closeModal('detailsModal');
+      renderApp();
+      alert('✓ Reset to current date & time!');
+    }
+    
+    function getSystemDateTime() {
+      const stored = localStorage.getItem('systemDateTime');
+      return stored ? new Date(stored) : new Date();
+    }
+
+    function showImportModal() {
+      const html = `
+        <h3>📤 Import Data from Backup</h3>
+        <p style="color: #6B7280; margin-bottom: 20px;">
+          Upload a previously exported JSON backup file to restore your data.
+        </p>
+        
+        <div style="background: #FEF3C7; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #F59E0B;">
+          <strong>⚠️ Warning:</strong> Importing will <strong>replace</strong> all current data with the backup file.
+          <br>Consider exporting current data first as a backup!
+        </div>
+        
+        <input type="file" id="importFileInput" accept=".json" style="margin-bottom: 20px; padding: 10px; border: 2px solid #E5E7EB; border-radius: 8px; width: 100%;">
+        
+        <div style="display: flex; gap: 10px;">
+          <button onclick="importDataFromFile()" class="btn-primary" style="flex: 1;">
+            📤 Import & Restore
+          </button>
+          <button onclick="closeModal('detailsModal')" style="flex: 1; padding: 10px; background: #6B7280; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Cancel
+          </button>
+        </div>
+      `;
+      
+      document.getElementById('detailsContent').innerHTML = html;
+      document.getElementById('detailsModal').classList.add('show');
+    }
+
+    function importDataFromFile() {
+      const fileInput = document.getElementById('importFileInput');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        alert('Please select a file to import');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importData = JSON.parse(e.target.result);
+          
+          // Validate the data
+          if (!importData.inventory || !importData.requests) {
+            alert('❌ Invalid backup file!\n\nThe file does not contain valid warehouse data.');
+            return;
+          }
+          
+          // Confirm import
+          const itemCount = importData.inventory.length;
+          const requestCount = importData.requests.length;
+          const exportDate = importData.exportDate ? new Date(importData.exportDate).toLocaleString() : 'Unknown';
+          
+          if (!confirm(
+            `Import this backup?\n\n` +
+            `📦 Items: ${itemCount}\n` +
+            `📋 Requests: ${requestCount}\n` +
+            `📅 Exported: ${exportDate}\n\n` +
+            `This will REPLACE all current data!`
+          )) {
+            return;
+          }
+          
+          // Import the data
+          inventory = importData.inventory;
+          requests = importData.requests;
+          requestCounter = importData.requestCounter || 1000;
+          outOfStockHistory = importData.outOfStockHistory || [];
+          
+          // Save to localStorage
+          saveData();
+          
+          // Close modal and refresh
+          closeModal('detailsModal');
+          renderApp();
+          
+          alert(
+            `✓ Data imported successfully!\n\n` +
+            `📦 ${itemCount} items loaded\n` +
+            `📋 ${requestCount} requests loaded\n\n` +
+            `Your data has been restored!`
+          );
+          
+        } catch (err) {
+          console.error('Import error:', err);
+          alert(`❌ Error importing file!\n\n${err.message}\n\nPlease make sure you selected a valid backup file.`);
+        }
+      };
+      
+      reader.readAsText(file);
+    }
+
+    // Load data on page load
+    loadData();
+    loadCurrentUser(); // Load user session for this tab
+    
+    // Auto-login if user session exists (for multi-tab support)
+    if (currentUser) {
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("mainApp").style.display = "block";
+      document.getElementById("userName").textContent = currentUser.name;
+      let roleText = currentUser.role.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+      if (currentUser.department) roleText += " - " + currentUser.department;
+      document.getElementById("userRole").textContent = roleText;
+      renderApp();
+    }
+
+    document.getElementById("roleSelect").addEventListener("change", function () {
+      const deptGroup = document.getElementById("departmentGroup");
+      if (this.value === "requester") {
+        deptGroup.style.display = "block";
+        document.getElementById("departmentSelect").required = true;
+      } else {
+        deptGroup.style.display = "none";
+        document.getElementById("departmentSelect").required = false;
+      }
+    });
+
+    function handleLogin(e) {
+      e.preventDefault();
+
+      const role = document.getElementById("roleSelect").value;
+      const name = document.getElementById("nameInput").value.trim();
+      const dept = document.getElementById("departmentSelect").value;
+
+      currentUser = { role, name, department: dept || null };
+      saveCurrentUser(); // Save to sessionStorage for this tab
+
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("mainApp").style.display = "block";
+
+      document.getElementById("userName").textContent = name;
+      let roleText = role.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+      if (dept) roleText += " - " + dept;
+      document.getElementById("userRole").textContent = roleText;
+
+      renderApp();
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      saveCurrentUser(); // Clear from sessionStorage
+      document.getElementById("mainApp").style.display = "none";
+      document.getElementById("loginScreen").style.display = "flex";
+      document.getElementById("roleSelect").value = "";
+      document.getElementById("nameInput").value = "";
+      document.getElementById("departmentSelect").value = "";
+    }
+
+    function showNotification(message) {
+      const notif = document.getElementById("notification");
+      notif.textContent = "🔔 " + message;
+      notif.classList.add("show");
+      setTimeout(() => notif.classList.remove("show"), 5000);
+    }
+
+    function checkOutOfStock() {
+      for (let i = 0; i < inventory.length; i++) {
+        if (inventory[i].qty === 0 && !inventory[i].outOfStockSince) {
+          inventory[i].outOfStockSince = new Date().toISOString();
+          outOfStockHistory.push({
+            itemId: inventory[i].id,
+            itemName: inventory[i].name,
+            outSince: new Date().toISOString(),
+            restockedAt: null,
+            duration: null
+          });
+          if (currentUser && currentUser.role === "direct_manager") {
+            showNotification("ALERT: " + inventory[i].name + " is now OUT OF STOCK!");
+          }
+        } else if (inventory[i].qty > 0 && inventory[i].outOfStockSince) {
+          const hist = outOfStockHistory.find((h) => h.itemId === inventory[i].id && !h.restockedAt);
+          if (hist) {
+            hist.restockedAt = new Date().toISOString();
+            const duration = new Date(hist.restockedAt) - new Date(hist.outSince);
+            hist.duration = Math.floor(duration / (1000 * 60 * 60 * 24)) + " days";
+          }
+          inventory[i].outOfStockSince = null;
+        }
+      }
+    }
+
+    function calculateProcessingTime(request) {
+      if (!request.receivedAt) return "In Progress";
+      const start = new Date(request.submittedAt);
+      const end = new Date(request.receivedAt);
+      const diff = end - start;
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      return days + "d " + hours + "h";
+    }
+
+    function renderApp() {
+      checkOutOfStock();
+      renderStats();
+      renderTabs();
+      showTab(currentTab || getDefaultTab());
+    }
+
+    function getDefaultTab() {
+      return currentUser.role === "requester" ? "submit" : "dashboard";
+    }
+
+    function renderStats() {
+      // Filter requests by date range if set
+      let filteredRequests = requests;
+      if (filterFromDate && filterToDate) {
+        filteredRequests = requests.filter(r => {
+          const reqDate = new Date(r.submittedAt);
+          const from = new Date(filterFromDate);
+          const to = new Date(filterToDate);
+          return reqDate >= from && reqDate <= to;
+        });
+      }
+      
+      let stats = [];
+      if (currentUser.role === "warehouse_manager") {
+        let totalValue = 0;
+        for (let i = 0; i < inventory.length; i++) totalValue += inventory[i].qty * inventory[i].price;
+
+        stats = [
+          { label: "Total Items", value: inventory.length },
+          { label: "Total Value", value: "$" + totalValue.toFixed(2) },
+          { label: "Low Stock", value: inventory.filter((i) => i.qty > 0 && i.qty <= i.min).length },
+          { label: "Out of Stock", value: inventory.filter((i) => i.qty === 0).length }
+        ];
+      } else if (currentUser.role === "direct_manager") {
+        const label = (filterFromDate && filterToDate) ? "Filtered Requests" : "Total Requests";
+        stats = [
+          { label: "Total Items", value: inventory.length },
+          { label: "Low Stock Alerts", value: inventory.filter((i) => i.qty <= i.min).length },
+          { label: label, value: filteredRequests.length },
+          { label: "Out of Stock", value: inventory.filter((i) => i.qty === 0).length }
+        ];
+      } else {
+        const myReqs = filteredRequests.filter((r) => r.requester === currentUser.name && r.dept === currentUser.department);
+        const label = (filterFromDate && filterToDate) ? "Filtered Requests" : "My Requests";
+        stats = [
+          { label: label, value: myReqs.length },
+          { label: "Pending", value: myReqs.filter((r) => r.status === "Pending" || r.status === "Approved" || r.status === "AwaitingConfirmation").length },
+          { label: "Completed", value: myReqs.filter((r) => r.status === "Completed").length }
+        ];
+      }
+
+      let html = "";
+      for (let i = 0; i < stats.length; i++) {
+        html += `<div class="stat-box"><div class="stat-label">${stats[i].label}</div><div class="stat-value">${stats[i].value}</div></div>`;
+      }
+      
+      // Add date range filter
+      html += `<div class="stat-box" style="background: linear-gradient(135deg, #6366F1, #8B5CF6); padding: 15px;">
+        <div class="stat-label" style="color: white; margin-bottom: 10px;">📅 Filter by Date Range</div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <input type="date" id="filterFrom" value="${filterFromDate || ''}" 
+            style="padding: 8px; border-radius: 5px; border: 2px solid white; font-size: 14px;">
+          <input type="date" id="filterTo" value="${filterToDate || ''}" 
+            style="padding: 8px; border-radius: 5px; border: 2px solid white; font-size: 14px;">
+          <div style="display: flex; gap: 5px;">
+            <button onclick="applyDateFilter()" 
+              style="flex: 1; padding: 8px; background: white; color: #6366F1; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">
+              Apply
+            </button>
+            <button onclick="clearDateFilter()" 
+              style="flex: 1; padding: 8px; background: #EF4444; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>`;
+      
+      return html;
+    }
+    
+    function applyDateFilter() {
+      const fromInput = document.getElementById('filterFrom');
+      const toInput = document.getElementById('filterTo');
+      
+      if (!fromInput.value || !toInput.value) {
+        alert('Please select both From and To dates');
+        return;
+      }
+      
+      const from = new Date(fromInput.value);
+      const to = new Date(toInput.value);
+      
+      if (from > to) {
+        alert('From date must be before To date');
+        return;
+      }
+      
+      filterFromDate = fromInput.value;
+      filterToDate = toInput.value;
+      renderApp();
+    }
+    
+    function clearDateFilter() {
+      filterFromDate = null;
+      filterToDate = null;
+      renderApp();
+    }
+
+    function renderTabs() {
+      let tabs = [];
+      if (currentUser.role === "warehouse_manager") {
+        tabs = [
+          { id: "dashboard", label: "📊 Dashboard" },
+          { id: "inventory", label: "📦 Inventory" },
+          { id: "requests", label: "📝 Manage Requests" },
+          { id: "consumption", label: "📈 Consumption Analysis" }
+        ];
+      } else if (currentUser.role === "direct_manager") {
+        tabs = [
+          { id: "dashboard", label: "📊 Dashboard" },
+          { id: "inventory", label: "📦 View Stock" },
+          { id: "forecast", label: "🔮 Smart Prediction" }
+        ];
+      } else {
+        tabs = [
+          { id: "submit", label: "📝 Submit Request" },
+          { id: "history", label: "📋 My Requests" }
+        ];
+      }
+
+      let html = "";
+      for (let i = 0; i < tabs.length; i++) {
+        html += `<button class="tab" onclick="showTab('${tabs[i].id}')">${tabs[i].label}</button>`;
+      }
+      document.getElementById("tabsNav").innerHTML = html;
+    }
+
+    function showTab(tabId) {
+      currentTab = tabId;
+
+      const tabs = document.querySelectorAll(".tab");
+      tabs.forEach((t) => t.classList.remove("active"));
+      [...tabs].find((t) => t.getAttribute("onclick")?.includes(`'${tabId}'`))?.classList.add("active");
+
+      let content = "";
+      if (tabId === "dashboard") content = renderDashboard();
+      else if (tabId === "inventory") content = renderInventory();
+      else if (tabId === "requests") content = renderRequests();
+      else if (tabId === "submit") content = renderSubmitRequest();
+      else if (tabId === "history") content = renderHistory();
+      else if (tabId === "forecast") content = renderForecast();
+      else if (tabId === "consumption") content = renderConsumptionAnalysis();
+
+      document.getElementById("content").innerHTML = content;
+      attachEventListeners();
+    }
+
+    function renderDashboard() {
+      const lowStock = inventory.filter((i) => i.qty > 0 && i.qty <= i.min);
+      const outOfStock = inventory.filter((i) => i.qty === 0);
+      let totalValue = 0;
+      for (let i = 0; i < inventory.length; i++) totalValue += inventory[i].qty * inventory[i].price;
+
+      const now = getSystemDateTime();
+      const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+      let html = `<div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+          <div>
+            <h2 style="margin: 0;">Dashboard</h2>
+            <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+              <span style="color: #6B7280;">
+                📅 ${dateStr} • 🕐 ${timeStr}
+              </span>
+              <button onclick="showDateTimePicker()" style="padding: 5px 12px; background: #6366F1; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">
+                ✏️ Change Date/Time
+              </button>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button onclick="exportAllData()" class="btn-primary" style="background: #10B981; padding: 10px 20px;">
+              📥 Export Data
+            </button>
+            <button onclick="showImportModal()" class="btn-primary" style="background: #6366F1; padding: 10px 20px;">
+              📤 Import Data
+            </button>
+          </div>
+        </div>
+      `;
+      html += `<div class="grid-3" style="margin-bottom: 20px;">`;
+      html += `<div style="padding: 20px; background: #f8f9fa; border-radius: 10px; text-align: center;">
+        <div style="font-size: 0.85rem; color: #666; font-weight: 600;">TOTAL INVENTORY VALUE</div>
+        <div style="font-size: 2rem; font-weight: 800; color: #10B981; margin-top: 10px;">$${totalValue.toFixed(2)}</div>
+      </div>`;
+      html += `<div style="padding: 20px; background: #f8f9fa; border-radius: 10px; text-align: center;">
+        <div style="font-size: 0.85rem; color: #666; font-weight: 600;">LOW STOCK ITEMS</div>
+        <div style="font-size: 2rem; font-weight: 800; color: #F59E0B; margin-top: 10px;">${lowStock.length}</div>
+      </div>`;
+      html += `<div style="padding: 20px; background: #f8f9fa; border-radius: 10px; text-align: center;">
+        <div style="font-size: 0.85rem; color: #666; font-weight: 600;">OUT OF STOCK</div>
+        <div style="font-size: 2rem; font-weight: 800; color: #EF4444; margin-top: 10px;">${outOfStock.length}</div>
+      </div>`;
+      html += `</div>`;
+
+      // Out of Stock Items Details
+      if (outOfStock.length > 0) {
+        html += `<div style="background: #FEE2E2; padding: 20px; border-radius: 10px; border-left: 4px solid #EF4444; margin-bottom: 20px;">
+          <h3 style="color: #991B1B; margin-top: 0;">🚫 OUT OF STOCK - Urgent Action Needed!</h3>
+          <table style="width: 100%; background: white; border-radius: 8px; overflow: hidden;">
+            <thead>
+              <tr style="background: #EF4444; color: white;">
+                <th style="padding: 12px; text-align: left;">Item</th>
+                <th style="padding: 12px; text-align: center;">Code</th>
+                <th style="padding: 12px; text-align: center;">Category</th>
+                <th style="padding: 12px; text-align: center;">Location</th>
+                <th style="padding: 12px; text-align: center;">Min Required</th>
+                <th style="padding: 12px; text-align: center;">Out of Stock Duration</th>
+              </tr>
+            </thead>
+            <tbody>`;
+        
+        outOfStock.forEach(item => {
+          // Calculate duration
+          let durationInfo = 'Unknown';
+          if (item.outOfStockSince) {
+            const outOfStockDate = new Date(item.outOfStockSince);
+            const diffMs = now - outOfStockDate;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            
+            if (diffDays > 0) {
+              durationInfo = `<strong>${diffDays} day${diffDays !== 1 ? 's' : ''} ${diffHours}h</strong><br><small>Since: ${outOfStockDate.toLocaleDateString()}</small>`;
+            } else if (diffHours > 0) {
+              durationInfo = `<strong>${diffHours} hour${diffHours !== 1 ? 's' : ''}</strong><br><small>Since: ${outOfStockDate.toLocaleTimeString()}</small>`;
+            } else {
+              const diffMins = Math.floor(diffMs / (1000 * 60));
+              durationInfo = `<strong>${diffMins} min${diffMins !== 1 ? 's' : ''}</strong><br><small>Just now</small>`;
+            }
+          }
+          
+          html += `<tr style="border-bottom: 1px solid #FEE2E2;">
+            <td style="padding: 12px;"><strong>${item.name}</strong></td>
+            <td style="padding: 12px; text-align: center;"><code>${item.code}</code></td>
+            <td style="padding: 12px; text-align: center;">${item.category}</td>
+            <td style="padding: 12px; text-align: center;">${item.loc}</td>
+            <td style="padding: 12px; text-align: center;"><strong>${item.min}</strong> needed</td>
+            <td style="padding: 12px; text-align: center; color: #991B1B;">${durationInfo}</td>
+          </tr>`;
+        });
+        
+        html += `</tbody></table></div>`;
+      }
+
+      // Low Stock Items Details
+      if (lowStock.length > 0) {
+        html += `<div style="background: #FEF3C7; padding: 20px; border-radius: 10px; border-left: 4px solid #F59E0B; margin-bottom: 20px;">
+          <h3 style="color: #92400E; margin-top: 0;">⚠️ LOW STOCK - Order Soon</h3>
+          <table style="width: 100%; background: white; border-radius: 8px; overflow: hidden;">
+            <thead>
+              <tr style="background: #F59E0B; color: white;">
+                <th style="padding: 12px; text-align: left;">Item</th>
+                <th style="padding: 12px; text-align: center;">Code</th>
+                <th style="padding: 12px; text-align: center;">Current Stock</th>
+                <th style="padding: 12px; text-align: center;">Min Required</th>
+                <th style="padding: 12px; text-align: center;">Need to Order</th>
+                <th style="padding: 12px; text-align: center;">Location</th>
+              </tr>
+            </thead>
+            <tbody>`;
+        
+        lowStock.forEach(item => {
+          const needToOrder = item.min - item.qty;
+          const stockPercent = (item.qty / item.min) * 100;
+          const urgency = stockPercent < 50 ? 'High' : 'Medium';
+          const urgencyColor = stockPercent < 50 ? '#EF4444' : '#F59E0B';
+          
+          html += `<tr style="border-bottom: 1px solid #FEF3C7;">
+            <td style="padding: 12px;"><strong>${item.name}</strong></td>
+            <td style="padding: 12px; text-align: center;"><code>${item.code}</code></td>
+            <td style="padding: 12px; text-align: center;"><strong style="color: ${urgencyColor};">${item.qty}</strong></td>
+            <td style="padding: 12px; text-align: center;">${item.min}</td>
+            <td style="padding: 12px; text-align: center;"><strong>${needToOrder}</strong></td>
+            <td style="padding: 12px; text-align: center;">${item.loc}</td>
+          </tr>`;
+        });
+        
+        html += `</tbody></table></div>`;
+      }
+
+      // All Good Message
+      if (lowStock.length === 0 && outOfStock.length === 0) {
+        html += `<div class="alert alert-success" style="text-align: center; padding: 30px;">
+          <h3 style="color: #10B981; margin: 0;">✓ All Stock Levels Good!</h3>
+          <p style="margin: 10px 0 0 0;">No items need immediate attention.</p>
+        </div>`;
+      }
+
+      // Reset button for warehouse manager only (collapsed by default)
+      if (currentUser.role === 'warehouse_manager') {
+        html += `<div style="margin-top: 30px;">
+          <details style="cursor: pointer;">
+            <summary style="padding: 15px; background: #F3F4F6; border-radius: 10px; font-weight: 600; color: #6B7280;">
+              🔧 Advanced Settings (Click to expand)
+            </summary>
+            <div style="margin-top: 15px; padding: 20px; background: #F3F4F6; border-radius: 10px;">
+              
+              <!-- Export/Import Section -->
+              <div style="background: #DBEAFE; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3B82F6;">
+                <h4 style="color: #1E40AF; margin-top: 0;">💾 Backup & Transfer Data</h4>
+                <p style="color: #1E3A8A; margin-bottom: 15px; font-size: 14px;">
+                  <strong>Export:</strong> Download all data to use on another device<br>
+                  <strong>Import:</strong> Load data from a backup file
+                </p>
+                <div style="display: flex; gap: 10px;">
+                  <button onclick="exportAllData()" style="flex: 1; background: #3B82F6; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    📤 Export Data
+                  </button>
+                  <button onclick="importAllData()" style="flex: 1; background: #10B981; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    📥 Import Data
+                  </button>
+                </div>
+                <small style="display: block; margin-top: 10px; color: #1E3A8A;">
+                  ℹ️ Use Export before switching devices. Then Import on the new device.
+                </small>
+              </div>
+              
+              <!-- Reset Section -->
+              <div style="background: #FEF3C7; padding: 20px; border-radius: 10px; border-left: 4px solid #F59E0B;">
+                <h4 style="color: #92400E; margin-top: 0;">⚠️ Reset Data to Defaults</h4>
+                <p style="color: #78350F; margin-bottom: 15px; font-size: 14px;">
+                  Use this ONLY if you want to clear all saved data and start fresh. 
+                  This will delete ALL requests, reset inventory to default values, and clear all history.
+                  <br><br>
+                  <strong>Note:</strong> Your data is automatically saved in your browser. 
+                  This is useful if you want to demo the system with fresh data.
+                </p>
+                <button onclick="resetAllData()" style="background: #EF4444; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                  🗑️ Reset All Data to Defaults
+                </button>
+              </div>
+            </div>
+          </details>
+        </div>`;
+      }
+
+      html += `</div>`;
+      return html;
+    }
+
+    function renderInventory() {
+      let html = `<div class="card"><h2>📦 Inventory</h2>`;
+      html += `<div class="filter-bar">
+        <input type="text" id="searchFilter" placeholder="Search items..." style="flex: 1;">
+        <select id="categoryFilter">
+          <option value="">All Categories</option>
+          <option>Office Supplies</option>
+          <option>Packaging</option>
+          <option>Gift Cards</option>
+          <option>Cleaning</option>
+        </select>
+        <select id="statusFilter">
+          <option value="">All Status</option>
+          <option value="ok">In Stock</option>
+          <option value="low">Low Stock</option>
+          <option value="out">Out of Stock</option>
+        </select>
+      </div>`;
+      html += `<div id="inventoryTable"></div></div>`;
+      return html;
+    }
+
+    function filterInventory() {
+      const search = document.getElementById("searchFilter").value.toLowerCase();
+      const category = document.getElementById("categoryFilter").value;
+      const status = document.getElementById("statusFilter").value;
+
+      const filtered = inventory.filter((item) => {
+        const matchSearch = item.name.toLowerCase().includes(search) || item.code.toLowerCase().includes(search);
+        const matchCategory = !category || item.category === category;
+        const matchStatus =
+          !status ||
+          (status === "ok" && item.qty > item.min) ||
+          (status === "low" && item.qty > 0 && item.qty <= item.min) ||
+          (status === "out" && item.qty === 0);
+        return matchSearch && matchCategory && matchStatus;
+      });
+
+      const showPrice = currentUser.role !== "requester";
+      let html = `<table><thead><tr><th>Code</th><th>Name</th><th>Category</th><th>Qty</th><th>Min</th>`;
+      if (showPrice) html += `<th>Price</th><th>Value</th>`;
+      html += `<th>Location</th><th>Status</th><th>Out of Stock Info</th></tr></thead><tbody>`;
+
+      let totalValue = 0;
+      const now = new Date();
+      
+      for (let i = 0; i < filtered.length; i++) {
+        const st = filtered[i].qty === 0 ? "Out" : filtered[i].qty <= filtered[i].min ? "Low" : "OK";
+        const badge = filtered[i].qty === 0 ? "danger" : filtered[i].qty <= filtered[i].min ? "warning" : "success";
+        const itemValue = filtered[i].qty * filtered[i].price;
+        totalValue += itemValue;
+
+        // Calculate out-of-stock duration
+        let outOfStockInfo = '-';
+        if (filtered[i].qty === 0 && filtered[i].outOfStockSince) {
+          const outOfStockDate = new Date(filtered[i].outOfStockSince);
+          const diffMs = now - outOfStockDate;
+          const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+          const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          
+          if (diffDays > 0) {
+            outOfStockInfo = `<span style="color: #EF4444; font-weight: bold;">⚠️ ${diffDays} day${diffDays !== 1 ? 's' : ''} ${diffHours}h</span><br><small style="color: #991B1B;">Since: ${outOfStockDate.toLocaleDateString()} ${outOfStockDate.toLocaleTimeString()}</small>`;
+          } else if (diffHours > 0) {
+            outOfStockInfo = `<span style="color: #EF4444; font-weight: bold;">⚠️ ${diffHours} hour${diffHours !== 1 ? 's' : ''}</span><br><small style="color: #991B1B;">Since: ${outOfStockDate.toLocaleTimeString()}</small>`;
+          } else {
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            outOfStockInfo = `<span style="color: #EF4444; font-weight: bold;">⚠️ ${diffMins} minute${diffMins !== 1 ? 's' : ''}</span><br><small style="color: #991B1B;">Just now</small>`;
+          }
+        } else if (filtered[i].qty === 0) {
+          outOfStockInfo = '<span style="color: #EF4444;">🚫 Out of stock</span>';
+        }
+
+        html += `<tr>
+          <td><strong>${filtered[i].code}</strong></td>
+          <td>${filtered[i].name}</td>
+          <td>${filtered[i].category}</td>
+          <td><strong>${filtered[i].qty}</strong></td>
+          <td>${filtered[i].min}</td>`;
+        if (showPrice) html += `<td>$${filtered[i].price.toFixed(2)}</td><td>$${itemValue.toFixed(2)}</td>`;
+        html += `<td>${filtered[i].loc}</td>
+          <td><span class="badge badge-${badge}">${st}</span></td>
+          <td style="text-align: center;">${outOfStockInfo}</td>
+        </tr>`;
+      }
+
+      if (showPrice) {
+        html += `<tr style="background:#f8f9fa;font-weight:bold;"><td colspan="6" style="text-align:right;">TOTAL VALUE:</td><td colspan="4">$${totalValue.toFixed(2)}</td></tr>`;
+      }
+      html += `</tbody></table>`;
+      document.getElementById("inventoryTable").innerHTML = html;
+    }
+
+    function renderRequests() {
+      // Filter by date range if set
+      let yearRequests = requests;
+      let titleSuffix = "";
+      
+      if (filterFromDate && filterToDate) {
+        yearRequests = requests.filter(r => {
+          const reqDate = new Date(r.submittedAt);
+          const from = new Date(filterFromDate);
+          const to = new Date(filterToDate);
+          return reqDate >= from && reqDate <= to;
+        });
+        titleSuffix = ` (${new Date(filterFromDate).toLocaleDateString()} - ${new Date(filterToDate).toLocaleDateString()})`;
+      }
+      
+      let html = `<div class="card"><h2>📝 Manage Requests${titleSuffix}</h2>`;
+
+      if (yearRequests.length === 0) {
+        html += `<p style="text-align:center;color:#666;padding:40px;">No requests found${titleSuffix ? ' for this date range' : ''}</p>`;
+      } else {
+        html += `<table><thead><tr>
+          <th>Request #</th><th>Date/Time</th><th>Requester</th><th>Dept</th><th>Items</th><th>Status</th><th>Actions</th>
+        </tr></thead><tbody>`;
+
+        for (let i = requests.length - 1; i >= 0; i--) {
+          const req = requests[i];
+          
+          // Apply date filter
+          if (filterFromDate && filterToDate) {
+            const reqDate = new Date(req.submittedAt);
+            const from = new Date(filterFromDate);
+            const to = new Date(filterToDate);
+            if (!(reqDate >= from && reqDate <= to)) continue;
+          }
+          
+          const badge = req.status === "Completed" ? "success" : req.status === "AwaitingConfirmation" ? "info" : "warning";
+
+          html += `<tr>
+            <td><strong>#${req.num}</strong><br><small style="color:#999;">ID:${req.id}</small></td>
+            <td>${new Date(req.submittedAt).toLocaleString()}</td>
+            <td><strong>${req.requester}</strong></td>
+            <td>${req.dept}</td>
+            <td>${req.items.length} items</td>
+            <td><span class="badge badge-${badge}">${req.status}</span></td>
+            <td>`;
+
+          if (req.status === "Pending") {
+            html += `<button class="btn-success" onclick="reviewRequest(${i})">Review</button>`;
+          } else if (req.status === "Approved") {
+            html += `<button class="btn-success" onclick="fulfillRequest(${i})">Fulfill</button>`;
+          } else {
+            html += `<button class="btn-success" onclick="viewRequestDetails(${i})">View</button>`;
+          }
+          
+          // Print button for all requests
+          html += ` <button class="btn-primary" onclick="printRequest(${i})" style="background: #6366F1; margin-left: 5px;">🖨️ Print</button>`;
+
+          html += `</td></tr>`;
+        }
+
+        html += `</tbody></table>`;
+      }
+
+      html += `</div>`;
+      return html;
+    }
+
+    function reviewRequest(index) {
+      const req = requests[index];
+      let html = `<h3>Request #${req.num}</h3>
+        <p><strong>Requester:</strong> ${req.requester}<br>
+        <strong>Department:</strong> ${req.dept}<br>
+        <strong>Submitted:</strong> ${new Date(req.submittedAt).toLocaleString()}</p>
+        <hr style="margin:20px 0;">
+        <h3>Review & Adjust Items:</h3>`;
+
+      html += `<form id="reviewForm">
+        <table>
+          <thead><tr><th>Item</th><th>Requested</th><th>Available Stock</th><th>Approve Qty</th><th>Reason (if adjusted)</th></tr></thead>
+          <tbody>`;
+
+      for (let i = 0; i < req.items.length; i++) {
+        const item = req.items[i];
+        const invItem = inventory.find(x => x.code === item.itemCode);
+        const availableQty = invItem ? invItem.qty : 0;
+        const requested = item.requestedQty;
+        const maxApprove = Math.min(requested, availableQty);
+        
+        // Warning if requested > available
+        const warning = requested > availableQty ? 
+          `<br><small style="color: #EF4444; font-weight: bold;">⚠️ Only ${availableQty} available!</small>` : '';
+        
+        const rowStyle = requested > availableQty ? 'background: #FEE2E2;' : '';
+        
+        // Auto-fill reason if stock insufficient
+        const defaultReason = requested > availableQty ? 'Insufficient stock - reduced to available quantity' : '';
+        
+        html += `<tr style="${rowStyle}">
+          <td>${item.itemName} <br><small style="color:#999;">${item.itemCode}</small>${warning}</td>
+          <td><strong>${requested}</strong></td>
+          <td><strong style="color: ${availableQty < requested ? '#EF4444' : '#10B981'};">${availableQty}</strong></td>
+          <td><input type="number" id="approved_${i}" value="${maxApprove}" min="0" max="${availableQty}" 
+              data-available="${availableQty}" data-itemcode="${item.itemCode}" 
+              style="width:80px;"></td>
+          <td><input type="text" id="reason_${i}" placeholder="Optional reason..." value="${defaultReason}" 
+              style="width:200px; padding: 5px;"></td>
+        </tr>`;
+      }
+
+      html += `</tbody></table>
+        <div style="margin-top: 20px; padding: 15px; background: #FEF3C7; border-radius: 8px; border-left: 4px solid #F59E0B;">
+          <strong>⚠️ Important:</strong> You can only approve quantities that are available in stock. 
+          The system will prevent you from approving more than what's available.
+          <br><strong>Tip:</strong> Add a reason when you adjust quantities (especially when reducing due to low stock).
+        </div>
+        <button type="button" class="btn-primary" onclick="approveRequest(${index})" style="margin-top:20px;">✓ Approve Request</button>
+      </form>`;
+
+      document.getElementById("modalContent").innerHTML = html;
+      document.getElementById("reviewModal").classList.add("show");
+    }
+
+    async function approveRequest(index) {
+      const req = requests[index];
+
+      // Validate and update approved quantities
+      let hasError = false;
+      let errorMessage = "";
+      
+      for (let i = 0; i < req.items.length; i++) {
+        const approved = parseInt(document.getElementById("approved_" + i).value || "0", 10);
+        const reason = document.getElementById("reason_" + i).value.trim();
+        const availableInput = document.getElementById("approved_" + i);
+        const available = parseInt(availableInput.getAttribute("data-available"));
+        const itemCode = availableInput.getAttribute("data-itemcode");
+        const invItem = inventory.find(x => x.code === itemCode);
+        
+        // CRITICAL VALIDATION: Check if approved > available
+        if (approved > available) {
+          hasError = true;
+          errorMessage += `\n❌ ${req.items[i].itemName}: You tried to approve ${approved} but only ${available} available in stock!`;
+        }
+        
+        req.items[i].approvedQty = approved;
+        req.items[i].adjustmentReason = reason; // Save the reason
+      }
+      
+      // If validation failed, show error and stop
+      if (hasError) {
+        alert("⚠️ CANNOT APPROVE - INSUFFICIENT STOCK!\n" + errorMessage + "\n\nPlease adjust the quantities and try again.");
+        return; // Stop here - don't approve
+      }
+
+      req.status = "Approved";
+      req.approvedAt = new Date().toISOString();
+      req.approvedBy = currentUser.name;
+
+      closeModal("reviewModal");
+      saveData(); // Save to localStorage
+      renderApp();
+      
+      alert("✓ Request approved successfully!");
+    }
+
+    async function fulfillRequest(index) {
+      if (!confirm("Fulfill this request?")) return;
+      const req = requests[index];
+
+      console.log("=== FULFILLING REQUEST ===");
+      console.log("Request:", req);
+      console.log("Inventory BEFORE:", JSON.parse(JSON.stringify(inventory)));
+
+      // Deduct inventory quantities
+      for (let i = 0; i < req.items.length; i++) {
+        const item = req.items[i];
+        console.log("Processing item:", item);
+        
+        const inv = inventory.find(x => x.code === item.itemCode);
+        console.log("Found in inventory:", inv);
+        
+        if (inv) {
+          const qtyToDeduct = item.approvedQty || item.requestedQty || 0;
+          console.log(`Deducting ${qtyToDeduct} from ${inv.name} (current: ${inv.qty})`);
+          
+          inv.qty = Math.max(0, inv.qty - qtyToDeduct);
+          console.log(`New quantity: ${inv.qty}`);
+        } else {
+          console.error("Item NOT found in inventory:", item.itemCode);
+        }
+      }
+
+      console.log("Inventory AFTER:", JSON.parse(JSON.stringify(inventory)));
+
+      req.status = "AwaitingConfirmation";
+      req.fulfilledAt = new Date().toISOString();
+      checkOutOfStock();
+      saveData(); // Save to localStorage
+      renderApp();
+
+      alert("✓ Request fulfilled! Inventory updated.\n\nCheck console (F12) to verify changes.");
+    }
+
+    function viewRequestDetails(index) {
+      const req = requests[index];
+      let html = `<h3>Request #${req.num}</h3>`;
+
+      html += `<div class="timeline">
+        <div class="timeline-item completed"><strong>Submitted</strong><br>${new Date(req.submittedAt).toLocaleString()}</div>
+        <div class="timeline-item ${req.approvedAt ? "completed" : ""}"><strong>Approved</strong><br>${req.approvedAt ? new Date(req.approvedAt).toLocaleString() : "Pending"}</div>
+        <div class="timeline-item ${req.fulfilledAt ? "completed" : ""}"><strong>Fulfilled</strong><br>${req.fulfilledAt ? new Date(req.fulfilledAt).toLocaleString() : "Pending"}</div>
+        <div class="timeline-item ${req.receivedAt ? "completed" : ""}"><strong>Received</strong><br>${req.receivedAt ? new Date(req.receivedAt).toLocaleString() : "Pending"}</div>
+      </div>`;
+
+      html += `<p><strong>Requester:</strong> ${req.requester}<br>
+        <strong>Department:</strong> ${req.dept}<br>
+        <strong>Status:</strong> ${req.status}</p>`;
+
+      html += `<table><thead><tr><th>Item</th><th>Requested</th><th>Approved</th><th>Adjustment Reason</th></tr></thead><tbody>`;
+      for (let i = 0; i < req.items.length; i++) {
+        const reason = req.items[i].adjustmentReason || '-';
+        const reasonStyle = req.items[i].adjustmentReason ? 'color: #F59E0B; font-style: italic;' : 'color: #999;';
+        
+        html += `<tr>
+          <td>${req.items[i].itemName}<br><small style="color:#999;">${req.items[i].itemCode}</small></td>
+          <td>${req.items[i].requestedQty}</td>
+          <td><strong>${req.items[i].approvedQty ?? "-"}</strong></td>
+          <td><small style="${reasonStyle}">${reason}</small></td>
+        </tr>`;
+      }
+      html += `</tbody></table>`;
+
+      document.getElementById("detailsContent").innerHTML = html;
+      document.getElementById("detailsModal").classList.add("show");
+    }
+
+    function renderSubmitRequest() {
+      let html = `<div class="card"><h2>📝 Submit Supply Request</h2>
+        <div id="submitAlert"></div>
+        <form id="submitForm">
+        <h3>Select Items:</h3>`;
+
+      for (let i = 0; i < inventory.length; i++) {
+        html += `<div class="item-row">
+          <input type="checkbox" id="item_${inventory[i].id}" value="${inventory[i].id}">
+          <label for="item_${inventory[i].id}">
+            <strong>${inventory[i].name}</strong> (${inventory[i].category})<br>
+            <small>Available: ${inventory[i].qty} | Location: ${inventory[i].loc}</small>
+          </label>
+          <input type="number" id="qty_${inventory[i].id}" min="1" placeholder="Qty" disabled>
+        </div>`;
+      }
+
+      html += `<button type="submit" class="btn-primary" style="margin-top:20px;">Submit Request</button>
+        </form></div>`;
+
+      return html;
+    }
+
+    function renderHistory() {
+      let myReqs = requests.filter((r) => r.requester === currentUser.name && r.dept === currentUser.department);
+      
+      let titleSuffix = "";
+      if (filterFromDate && filterToDate) {
+        myReqs = myReqs.filter(r => {
+          const reqDate = new Date(r.submittedAt);
+          const from = new Date(filterFromDate);
+          const to = new Date(filterToDate);
+          return reqDate >= from && reqDate <= to;
+        });
+        titleSuffix = ` (${new Date(filterFromDate).toLocaleDateString()} - ${new Date(filterToDate).toLocaleDateString()})`;
+      }
+      
+      let html = `<div class="card"><h2>📋 My Requests${titleSuffix}</h2>`;
+
+      if (myReqs.length === 0) {
+        html += `<p style="text-align:center;color:#666;padding:40px;">No requests found${titleSuffix ? ' for this date range' : ''}</p>`;
+      } else {
+        for (let i = myReqs.length - 1; i >= 0; i--) {
+          const req = myReqs[i];
+          const badge = req.status === "Completed" ? "success" : req.status === "AwaitingConfirmation" ? "info" : "warning";
+
+          html += `<div style="border:2px solid #e0e0e0;border-radius:10px;padding:20px;margin-bottom:20px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+              <h3>Request #${req.num}</h3>
+              <span class="badge badge-${badge}">${req.status}</span>
+            </div>
+
+            <div class="timeline">
+              <div class="timeline-item completed"><strong>Submitted</strong><br>${new Date(req.submittedAt).toLocaleString()}</div>
+              <div class="timeline-item ${req.approvedAt ? "completed" : ""}"><strong>Approved</strong><br>${req.approvedAt ? new Date(req.approvedAt).toLocaleString() : "Pending"}</div>
+              <div class="timeline-item ${req.fulfilledAt ? "completed" : ""}"><strong>Fulfilled</strong><br>${req.fulfilledAt ? new Date(req.fulfilledAt).toLocaleString() : "Pending"}</div>
+              <div class="timeline-item ${req.receivedAt ? "completed" : ""}"><strong>Received</strong><br>${req.receivedAt ? new Date(req.receivedAt).toLocaleString() : "Pending"}</div>
+            </div>
+
+            <table style="margin-top:15px;">
+              <thead><tr><th>Item</th><th>Requested</th><th>Approved</th></tr></thead>
+              <tbody>`;
+
+          for (let j = 0; j < req.items.length; j++) {
+            html += `<tr>
+              <td>${req.items[j].itemName}</td>
+              <td>${req.items[j].requestedQty}</td>
+              <td><strong>${req.items[j].approvedQty ?? "-"}</strong></td>
+            </tr>`;
+          }
+
+          html += `</tbody></table>`;
+
+          if (req.status === "AwaitingConfirmation") {
+            html += `<button class="btn-success" onclick="confirmReceipt(${req.id})" style="margin-top:15px;">✓ Confirm Received</button>`;
+          }
+
+          html += `</div>`;
+        }
+      }
+
+      html += `</div>`;
+      return html;
+    }
+
+    function confirmReceipt(requestId) {
+      const idx = requests.findIndex(r => String(r.id) === String(requestId));
+      if (idx === -1) return alert("Request not found");
+
+      // Ask user if they want to accept all or reject some
+      const userChoice = confirm("Did you receive all items in good condition?\n\n✓ Click OK if all items are good\n❌ Click Cancel if you want to reject some items");
+      
+      if (!userChoice) {
+        // User wants to reject some items
+        showRejectionModal(idx);
+        return;
+      }
+
+      // User accepts all items
+      requests[idx].status = "Completed";
+      requests[idx].receivedAt = new Date().toISOString();
+      saveData();
+      renderApp();
+
+      alert("✓ Request completed! All items received.");
+    }
+
+    // 🔄 REJECTION AFTER FULFILLMENT
+    function showRejectionModal(requestIndex) {
+      const req = requests[requestIndex];
+      
+      let html = `<h3>🚫 Reject Items from Request #${req.num}</h3>
+        <p style="background: #FEE2E2; padding: 15px; border-radius: 8px; color: #991B1B; margin-bottom: 20px;">
+          <strong>⚠️ Important:</strong> Select items you want to REJECT.<br>
+          Rejected items will be returned and a new request will be created automatically.
+        </p>
+        <form id="rejectionForm">
+          <table>
+            <thead><tr style="background: #EF4444; color: white;">
+              <th style="padding: 10px;">Select to Reject</th>
+              <th style="padding: 10px;">Item</th>
+              <th style="padding: 10px; text-align: center;">Quantity Received</th>
+            </tr></thead>
+            <tbody>`;
+      
+      req.items.forEach((item, i) => {
+        const qty = item.approvedQty || item.requestedQty;
+        html += `<tr style="border-bottom: 1px solid #E5E7EB;">
+          <td style="padding: 10px; text-align: center;">
+            <input type="checkbox" id="reject_${i}" value="${i}" style="width: 20px; height: 20px; cursor: pointer;">
+          </td>
+          <td style="padding: 10px;">
+            <strong>${item.itemName}</strong><br>
+            <small style="color: #6B7280;">${item.itemCode}</small>
+          </td>
+          <td style="padding: 10px; text-align: center;"><strong>${qty}</strong></td>
+        </tr>`;
+      });
+      
+      html += `</tbody></table>
+        <div style="margin-top: 20px; background: #FEF3C7; padding: 15px; border-radius: 8px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #92400E;">
+            📝 Reason for Rejection (Required):
+          </label>
+          <textarea id="rejectionReason" rows="3" style="width: 100%; padding: 10px; border: 2px solid #F59E0B; border-radius: 5px; font-size: 14px;" 
+            placeholder="Examples:&#10;• Items are damaged&#10;• Wrong items received&#10;• Quality does not meet standards&#10;• Quantity lower than approved&#10;• Packaging is broken" required></textarea>
+          <small style="color: #92400E; display: block; margin-top: 5px;">
+            ℹ️ Be specific - this helps warehouse manager understand the issue
+          </small>
+        </div>
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+          <button type="button" class="btn-danger" onclick="submitRejection(${requestIndex})" style="flex: 1; padding: 12px; font-size: 16px;">
+            ❌ Submit Rejection
+          </button>
+          <button type="button" onclick="closeModal('detailsModal')" style="flex: 1; padding: 12px; background: #6B7280; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+            Cancel
+          </button>
+        </div>
+      </form>`;
+      
+      document.getElementById("detailsContent").innerHTML = html;
+      document.getElementById("detailsModal").classList.add("show");
+    }
+
+    function submitRejection(requestIndex) {
+      const req = requests[requestIndex];
+      const reason = document.getElementById('rejectionReason').value.trim();
+      
+      if (!reason) {
+        alert('⚠️ Please provide a reason for rejection.\n\nThis helps the warehouse manager understand what went wrong.');
+        document.getElementById('rejectionReason').focus();
+        return;
+      }
+      
+      let rejectedItems = [];
+      let acceptedItems = [];
+      
+      req.items.forEach((item, i) => {
+        const checkbox = document.getElementById(`reject_${i}`);
+        if (checkbox && checkbox.checked) {
+          rejectedItems.push({
+            itemCode: item.itemCode,
+            itemName: item.itemName,
+            requestedQty: item.approvedQty || item.requestedQty
+          });
+        } else {
+          acceptedItems.push(item);
+        }
+      });
+      
+      if (rejectedItems.length === 0) {
+        alert('⚠️ Please select at least one item to reject.\n\nIf all items are good, click Cancel and then Confirm Received.');
+        return;
+      }
+      
+      if (rejectedItems.length === req.items.length) {
+        if (!confirm('You are rejecting ALL items.\n\nAre you sure? This will create a new request for everything.')) {
+          return;
+        }
+      }
+      
+      // Mark original request as completed with accepted items only
+      req.items = acceptedItems;
+      req.status = "Completed";
+      req.receivedAt = new Date().toISOString();
+      req.rejectedItemsCount = rejectedItems.length;
+      req.rejectionReason = reason;
+      
+      // Create new request for rejected items
+      requestCounter++;
+      const newRequest = {
+        id: Date.now(),
+        num: requestCounter,
+        requester: req.requester,
+        dept: req.dept,
+        items: rejectedItems,
+        status: "Pending",
+        submittedAt: new Date().toISOString(),
+        approvedAt: null,
+        fulfilledAt: null,
+        receivedAt: null,
+        isRejectionResubmit: true,
+        originalRequestNum: req.num,
+        rejectionReason: reason
+      };
+      requests.push(newRequest);
+      
+      saveData();
+      closeModal('detailsModal');
+      renderApp();
+      
+      alert(`✓ Rejection processed successfully!\n\n` +
+            `✅ Accepted: ${acceptedItems.length} item${acceptedItems.length !== 1 ? 's' : ''}\n` +
+            `❌ Rejected: ${rejectedItems.length} item${rejectedItems.length !== 1 ? 's' : ''}\n\n` +
+            `📋 New Request #${requestCounter} created for rejected items.\n` +
+            `The warehouse manager will be notified.`);
+    }
+
+    // 🖨️ PRINT REQUEST
+    function printRequest(index) {
+      const req = requests[index];
+      const printWindow = window.open('', '_blank');
+      
+      let itemsTable = '';
+      req.items.forEach(item => {
+        itemsTable += `<tr>
+          <td style="padding: 10px; border: 1px solid #ddd;">${item.itemName}</td>
+          <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${item.itemCode}</td>
+          <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${item.requestedQty}</td>
+          <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${item.approvedQty || '-'}</td>
+          <td style="padding: 10px; border: 1px solid #ddd;">${item.adjustmentReason || '-'}</td>
+        </tr>`;
+      });
+      
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Request #${req.num} - Print</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .header { border-bottom: 3px solid #6366F1; padding-bottom: 20px; margin-bottom: 30px; }
+            .header h1 { margin: 0; color: #1F2937; }
+            .info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+            .info-box { background: #F3F4F6; padding: 15px; border-radius: 8px; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th { background: #6366F1; color: white; padding: 12px; text-align: left; }
+            .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #E5E7EB; }
+            @media print { button { display: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>📦 Warehouse Request #${req.num}</h1>
+            <p style="color: #6B7280; margin: 5px 0;">Request ID: ${req.id}</p>
+          </div>
+          
+          <div class="info">
+            <div class="info-box">
+              <strong>Requester:</strong> ${req.requester}<br>
+              <strong>Department:</strong> ${req.dept}
+            </div>
+            <div class="info-box">
+              <strong>Status:</strong> ${req.status}<br>
+              <strong>Submitted:</strong> ${new Date(req.submittedAt).toLocaleString()}
+            </div>
+          </div>
+          
+          ${req.approvedAt ? `<div class="info-box"><strong>Approved:</strong> ${new Date(req.approvedAt).toLocaleString()} by ${req.approvedBy || '-'}</div>` : ''}
+          
+          <h3>📋 Requested Items</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Item Name</th>
+                <th>Code</th>
+                <th>Requested</th>
+                <th>Approved</th>
+                <th>Reason (if adjusted)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsTable}
+            </tbody>
+          </table>
+          
+          <div class="footer">
+            <p><strong>Signature:</strong> ___________________________ <strong>Date:</strong> _______________</p>
+            <p style="color: #6B7280; font-size: 12px; margin-top: 30px;">Generated: ${new Date().toLocaleString()}</p>
+          </div>
+          
+          <button onclick="window.print()" style="padding: 12px 24px; background: #6366F1; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 20px;">🖨️ Print This Request</button>
+        </body>
+        </html>
+      `;
+      
+      printWindow.document.write(html);
+      printWindow.document.close();
+    }
+
+    // 📊 CONSUMPTION ANALYSIS
+    function renderConsumptionAnalysis() {
+      let html = `<div class="card">
+        <h2>📊 Consumption Analysis & Reporting</h2>
+        <p style="color: #666; margin-bottom: 20px;">Analyze consumption patterns by department and item</p>
+        
+        <div style="background: #F3F4F6; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+          <h3 style="margin-top: 0;">Select Date Range:</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+            <div>
+              <label style="display: block; font-weight: 600; margin-bottom: 5px;">From Date:</label>
+              <input type="date" id="consumptionFromDate" style="width: 100%; padding: 10px; border: 1px solid #E5E7EB; border-radius: 5px;">
+            </div>
+            <div>
+              <label style="display: block; font-weight: 600; margin-bottom: 5px;">To Date:</label>
+              <input type="date" id="consumptionToDate" style="width: 100%; padding: 10px; border: 1px solid #E5E7EB; border-radius: 5px;">
+            </div>
+          </div>
+          <button class="btn-primary" onclick="generateConsumptionReport()" style="width: 100%; padding: 15px; font-size: 18px;">
+            📊 Generate Consumption Report
+          </button>
+        </div>
+        
+        <div id="consumptionResults"></div>
+      </div>`;
+      
+      return html;
+    }
+
+    function generateConsumptionReport() {
+      const fromDate = new Date(document.getElementById('consumptionFromDate').value);
+      const toDate = new Date(document.getElementById('consumptionToDate').value);
+      
+      if (!document.getElementById('consumptionFromDate').value || !document.getElementById('consumptionToDate').value) {
+        alert('Please select both From and To dates');
+        return;
+      }
+      
+      if (fromDate > toDate) {
+        alert('From date must be before To date');
+        return;
+      }
+      
+      // Set time to start/end of day for proper comparison
+      fromDate.setHours(0, 0, 0, 0);
+      toDate.setHours(23, 59, 59, 999);
+      
+      // Analyze consumption
+      let byDepartment = {};
+      let byItem = {};
+      let totalValue = 0;
+      let totalRequests = 0;
+      
+      console.log("=== CONSUMPTION REPORT ===");
+      console.log("From:", fromDate);
+      console.log("To:", toDate);
+      console.log("Total requests in system:", requests.length);
+      
+      requests.forEach(req => {
+        // Include Completed and AwaitingConfirmation (fulfilled) requests
+        // Use fulfilledAt (when warehouse gave items) not receivedAt
+        if ((req.status === 'Completed' || req.status === 'AwaitingConfirmation') && req.fulfilledAt) {
+          const reqDate = new Date(req.fulfilledAt);
+          console.log("Checking request #" + req.num + " - Fulfilled:", reqDate.toLocaleDateString(), "Status:", req.status);
+          
+          if (reqDate >= fromDate && reqDate <= toDate) {
+            console.log("✓ Including request #" + req.num);
+            totalRequests++;
+            
+            // By department
+            if (!byDepartment[req.dept]) {
+              byDepartment[req.dept] = {};
+            }
+            
+            req.items.forEach(item => {
+              const qty = item.approvedQty || item.requestedQty || 0;
+              const invItem = inventory.find(i => i.code === item.itemCode);
+              const cost = invItem ? qty * invItem.price : 0;
+              
+              console.log("  - " + item.itemName + ": " + qty + " units, $" + cost.toFixed(2));
+              
+              // By department per item
+              if (!byDepartment[req.dept][item.itemCode]) {
+                byDepartment[req.dept][item.itemCode] = {
+                  name: item.itemName,
+                  qty: 0,
+                  cost: 0
+                };
+              }
+              byDepartment[req.dept][item.itemCode].qty += qty;
+              byDepartment[req.dept][item.itemCode].cost += cost;
+              
+              // Overall by item
+              if (!byItem[item.itemCode]) {
+                byItem[item.itemCode] = {
+                  name: item.itemName,
+                  qty: 0,
+                  cost: 0,
+                  departments: {}
+                };
+              }
+              byItem[item.itemCode].qty += qty;
+              byItem[item.itemCode].cost += cost;
+              
+              if (!byItem[item.itemCode].departments[req.dept]) {
+                byItem[item.itemCode].departments[req.dept] = 0;
+              }
+              byItem[item.itemCode].departments[req.dept] += qty;
+              
+              totalValue += cost;
+            });
+          }
+        }
+      });
+      
+      console.log("Total consumption value:", totalValue);
+      console.log("Total requests included:", totalRequests);
+      
+      // Build report
+      let html = `<div style="background: linear-gradient(135deg, #6366F1, #8B5CF6); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 30px;">
+        <h3 style="color: white; margin: 0 0 10px 0;">📊 Consumption Report</h3>
+        <p style="margin: 0; opacity: 0.9;">${fromDate.toLocaleDateString()} - ${toDate.toLocaleDateString()}</p>
+        <div style="font-size: 48px; font-weight: bold; margin: 20px 0;">$${totalValue.toFixed(2)}</div>
+        <p>Total Consumption Value</p>
+        <p style="font-size: 14px; opacity: 0.9; margin-top: 10px;">${totalRequests} fulfilled requests</p>
+      </div>`;
+      
+      if (totalValue === 0) {
+        html += `<div style="background: #FEF3C7; padding: 30px; border-radius: 10px; text-align: center;">
+          <h3 style="color: #92400E; margin: 0 0 10px 0;">ℹ️ No Consumption Data</h3>
+          <p style="color: #78350F; margin: 0;">No fulfilled or completed requests found in the selected date range.</p>
+          <p style="color: #78350F; margin-top: 10px; font-size: 14px;">
+            <strong>Tip:</strong> Make sure you have requests that are "AwaitingConfirmation" or "Completed" 
+            and were fulfilled during ${fromDate.toLocaleDateString()} - ${toDate.toLocaleDateString()}
+          </p>
+        </div>`;
+        document.getElementById('consumptionResults').innerHTML = html;
+        return;
+      }
+      
+      // By Department
+      html += `<h3>📍 Consumption by Department</h3>`;
+      for (let dept in byDepartment) {
+        let deptTotal = 0;
+        let itemsHtml = '';
+        
+        for (let code in byDepartment[dept]) {
+          const item = byDepartment[dept][code];
+          deptTotal += item.cost;
+          itemsHtml += `<tr>
+            <td style="padding: 10px;">${item.name}</td>
+            <td style="padding: 10px; text-align: center;"><strong>${item.qty}</strong></td>
+            <td style="padding: 10px; text-align: right;">$${item.cost.toFixed(2)}</td>
+          </tr>`;
+        }
+        
+        html += `<div style="background: #F3F4F6; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+          <h4 style="margin: 0 0 15px 0; color: #6366F1;">${dept} - Total: $${deptTotal.toFixed(2)}</h4>
+          <table style="width: 100%; background: white; border-radius: 8px; overflow: hidden;">
+            <thead><tr style="background: #6366F1; color: white;">
+              <th style="padding: 10px; text-align: left;">Item</th>
+              <th style="padding: 10px; text-align: center;">Quantity</th>
+              <th style="padding: 10px; text-align: right;">Cost</th>
+            </tr></thead>
+            <tbody>${itemsHtml}</tbody>
+          </table>
+        </div>`;
+      }
+      
+      // Overall by Item
+      html += `<h3>📦 Overall Consumption by Item</h3>
+        <table style="width: 100%;">
+          <thead><tr style="background: #8B5CF6; color: white;">
+            <th style="padding: 12px; text-align: left;">Item</th>
+            <th style="padding: 12px; text-align: center;">Total Quantity</th>
+            <th style="padding: 12px; text-align: right;">Total Cost</th>
+            <th style="padding: 12px; text-align: left;">Departments</th>
+          </tr></thead>
+          <tbody>`;
+      
+      for (let code in byItem) {
+        const item = byItem[code];
+        let deptList = [];
+        for (let dept in item.departments) {
+          deptList.push(`${dept} (${item.departments[dept]})`);
+        }
+        
+        html += `<tr style="border-bottom: 1px solid #E5E7EB;">
+          <td style="padding: 12px;"><strong>${item.name}</strong></td>
+          <td style="padding: 12px; text-align: center;"><strong>${item.qty}</strong></td>
+          <td style="padding: 12px; text-align: right;">$${item.cost.toFixed(2)}</td>
+          <td style="padding: 12px;"><small>${deptList.join(', ')}</small></td>
+        </tr>`;
+      }
+      
+      html += `</tbody></table>`;
+      
+      document.getElementById('consumptionResults').innerHTML = html;
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove("show");
+    }
+
+    function attachEventListeners() {
+      if (currentTab === "inventory") {
+        filterInventory();
+        document.getElementById("searchFilter").addEventListener("input", filterInventory);
+        document.getElementById("categoryFilter").addEventListener("change", filterInventory);
+        document.getElementById("statusFilter").addEventListener("change", filterInventory);
+      }
+
+      if (currentTab === "submit") {
+        for (let i = 0; i < inventory.length; i++) {
+          ((itemId) => {
+            const cb = document.getElementById("item_" + itemId);
+            if (cb) {
+              cb.addEventListener("change", function () {
+                document.getElementById("qty_" + itemId).disabled = !this.checked;
+              });
+            }
+          })(inventory[i].id);
+        }
+
+        const form = document.getElementById("submitForm");
+        if (form) {
+          form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const items = [];
+            for (let i = 0; i < inventory.length; i++) {
+              const cb = document.getElementById("item_" + inventory[i].id);
+              const qtyInput = document.getElementById("qty_" + inventory[i].id);
+
+              if (cb && cb.checked && qtyInput && qtyInput.value) {
+                const qty = parseInt(qtyInput.value, 10);
+                if (qty > 0) {
+                  items.push({
+                    itemCode: inventory[i].code,
+                    itemName: inventory[i].name,
+                    requestedQty: qty
+                  });
+                }
+              }
+            }
+
+            if (items.length === 0) return alert("Please select items");
+
+            requestCounter++;
+            const newRequest = {
+              id: Date.now(), // this is RequestID in Google Sheet
+              num: requestCounter,
+              requester: currentUser.name,
+              dept: currentUser.department,
+              items: items,
+              status: "Pending",
+              submittedAt: new Date().toISOString(),
+              approvedAt: null,
+              fulfilledAt: null,
+              receivedAt: null
+            };
+
+            // Add to requests
+            requests.push(newRequest);
+            saveData(); // Save to localStorage
+
+            document.getElementById("submitAlert").innerHTML =
+              '<div class="alert alert-success">✓ Request #' + requestCounter + ' submitted successfully!</div>';
+
+            setTimeout(() => showTab("history"), 1200);
+          });
+        }
+      }
+    }
+    // 🔮 SMART PREDICTION WITH COMPARISON
+    function renderForecast() {
+      return `<div class="card">
+        <h2>🔮 Smart Prediction & Comparison</h2>
+        <p style="color: #666;">Compare consumption between different periods</p>
+        
+        <div style="background: #F3F4F6; padding: 20px; border-radius: 10px; margin: 20px 0;">
+          <h3 style="margin-top: 0;">📊 Compare Two Periods:</h3>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 20px;">
+            <!-- Period 1 -->
+            <div style="background: white; padding: 20px; border-radius: 10px; border: 2px solid #6366F1;">
+              <h4 style="color: #6366F1; margin-top: 0;">📅 Period 1</h4>
+              <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 600; margin-bottom: 5px;">From:</label>
+                <input type="date" id="period1From" style="width: 100%; padding: 10px; border: 1px solid #E5E7EB; border-radius: 5px;">
+              </div>
+              <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 5px;">To:</label>
+                <input type="date" id="period1To" style="width: 100%; padding: 10px; border: 1px solid #E5E7EB; border-radius: 5px;">
+              </div>
+            </div>
+            
+            <!-- Period 2 -->
+            <div style="background: white; padding: 20px; border-radius: 10px; border: 2px solid #8B5CF6;">
+              <h4 style="color: #8B5CF6; margin-top: 0;">📅 Period 2</h4>
+              <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 600; margin-bottom: 5px;">From:</label>
+                <input type="date" id="period2From" style="width: 100%; padding: 10px; border: 1px solid #E5E7EB; border-radius: 5px;">
+              </div>
+              <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 5px;">To:</label>
+                <input type="date" id="period2To" style="width: 100%; padding: 10px; border: 1px solid #E5E7EB; border-radius: 5px;">
+              </div>
+            </div>
+          </div>
+          
+          <button class="btn-primary" onclick="comparePeriods()" style="width: 100%; padding: 15px; font-size: 18px;">
+            📊 Compare Periods
+          </button>
+        </div>
+        
+        <div id="comparisonResult"></div>
+        
+        <div style="margin-top: 30px; border-top: 2px solid #E5E7EB; padding-top: 30px;">
+          <h3>🔮 Future Prediction (Next 6 Months)</h3>
+          <button class="btn-primary" onclick="showPrediction()">Generate Prediction</button>
+          <div id="predictionResult" style="margin-top: 20px;"></div>
+        </div>
+      </div>`;
+    }
+    
+    function comparePeriods() {
+      const p1From = document.getElementById('period1From').value;
+      const p1To = document.getElementById('period1To').value;
+      const p2From = document.getElementById('period2From').value;
+      const p2To = document.getElementById('period2To').value;
+      
+      if (!p1From || !p1To || !p2From || !p2To) {
+        alert('Please select all dates for both periods');
+        return;
+      }
+      
+      const period1Start = new Date(p1From);
+      const period1End = new Date(p1To);
+      const period2Start = new Date(p2From);
+      const period2End = new Date(p2To);
+      
+      // Set to start/end of day for proper inclusion
+      period1Start.setHours(0, 0, 0, 0);
+      period1End.setHours(23, 59, 59, 999);
+      period2Start.setHours(0, 0, 0, 0);
+      period2End.setHours(23, 59, 59, 999);
+      
+      // Calculate consumption for each period
+      function getConsumption(startDate, endDate) {
+        let usage = {};
+        let totalCost = 0;
+        let requestCount = 0;
+        
+        requests.forEach(req => {
+          // Use fulfilledAt (when items were given) and include AwaitingConfirmation
+          if ((req.status === 'Completed' || req.status === 'AwaitingConfirmation') && req.fulfilledAt) {
+            const reqDate = new Date(req.fulfilledAt);
+            if (reqDate >= startDate && reqDate <= endDate) {
+              requestCount++;
+              req.items.forEach(item => {
+                const inv = inventory.find(i => i.code === item.itemCode);
+                if (inv) {
+                  if (!usage[item.itemCode]) {
+                    usage[item.itemCode] = {
+                      name: item.itemName,
+                      qty: 0,
+                      cost: 0,
+                      price: inv.price
+                    };
+                  }
+                  const qty = item.approvedQty || item.requestedQty || 0;
+                  usage[item.itemCode].qty += qty;
+                  usage[item.itemCode].cost += qty * inv.price;
+                  totalCost += qty * inv.price;
+                }
+              });
+            }
+          }
+        });
+        
+        return { usage, totalCost, requestCount };
+      }
+      
+      const period1 = getConsumption(period1Start, period1End);
+      const period2 = getConsumption(period2Start, period2End);
+      
+      // Get all unique items
+      let allItems = new Set([...Object.keys(period1.usage), ...Object.keys(period2.usage)]);
+      
+      // Build comparison table
+      let html = '<div style="background: linear-gradient(135deg, #6366F1, #8B5CF6); color: white; padding: 30px; border-radius: 15px; margin-bottom: 30px;">';
+      html += '<h3 style="color: white; margin: 0 0 20px 0;">📊 Period Comparison Summary</h3>';
+      html += '<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; text-align: center;">';
+      
+      // Period 1 Stats
+      html += '<div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 10px;">';
+      html += '<div style="font-size: 14px; opacity: 0.9;">Period 1</div>';
+      html += '<div style="font-size: 12px; opacity: 0.8; margin: 5px 0;">' + p1From + ' to ' + p1To + '</div>';
+      html += '<div style="font-size: 32px; font-weight: bold; margin: 10px 0;">$' + period1.totalCost.toFixed(0) + '</div>';
+      html += '<div style="font-size: 14px;">' + period1.requestCount + ' requests</div>';
+      html += '</div>';
+      
+      // Difference
+      const diff = period1.totalCost - period2.totalCost;
+      const diffPercent = period2.totalCost > 0 ? ((diff / period2.totalCost) * 100) : 0;
+      const arrow = diff > 0 ? '📈' : diff < 0 ? '📉' : '➡️';
+      const color = diff > 0 ? '#EF4444' : diff < 0 ? '#10B981' : '#6B7280';
+      
+      html += '<div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 10px;">';
+      html += '<div style="font-size: 14px; opacity: 0.9;">Difference</div>';
+      html += '<div style="font-size: 48px; margin: 10px 0;">' + arrow + '</div>';
+      html += '<div style="font-size: 24px; font-weight: bold; color: ' + color + ';">';
+      html += (diff > 0 ? '+' : '') + '$' + Math.abs(diff).toFixed(0) + '</div>';
+      html += '<div style="font-size: 14px;">' + (diffPercent > 0 ? '+' : '') + diffPercent.toFixed(1) + '%</div>';
+      html += '</div>';
+      
+      // Period 2 Stats
+      html += '<div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 10px;">';
+      html += '<div style="font-size: 14px; opacity: 0.9;">Period 2</div>';
+      html += '<div style="font-size: 12px; opacity: 0.8; margin: 5px 0;">' + p2From + ' to ' + p2To + '</div>';
+      html += '<div style="font-size: 32px; font-weight: bold; margin: 10px 0;">$' + period2.totalCost.toFixed(0) + '</div>';
+      html += '<div style="font-size: 14px;">' + period2.requestCount + ' requests</div>';
+      html += '</div>';
+      
+      html += '</div></div>';
+      
+      // Detailed comparison table
+      html += '<h3>📋 Item-by-Item Comparison</h3>';
+      html += '<table><thead><tr>';
+      html += '<th>Item</th>';
+      html += '<th style="background: #6366F1; color: white;">Period 1<br><small style="opacity: 0.8;">' + p1From + ' to ' + p1To + '</small></th>';
+      html += '<th style="background: #8B5CF6; color: white;">Period 2<br><small style="opacity: 0.8;">' + p2From + ' to ' + p2To + '</small></th>';
+      html += '<th>Difference</th>';
+      html += '<th>Change %</th>';
+      html += '</tr></thead><tbody>';
+      
+      allItems.forEach(code => {
+        const item1 = period1.usage[code] || { name: period2.usage[code].name, qty: 0, cost: 0 };
+        const item2 = period2.usage[code] || { name: period1.usage[code].name, qty: 0, cost: 0 };
+        
+        const qtyDiff = item1.qty - item2.qty;
+        const changePercent = item2.qty > 0 ? ((qtyDiff / item2.qty) * 100) : (item1.qty > 0 ? 100 : 0);
+        
+        const rowColor = Math.abs(qtyDiff) > 10 ? (qtyDiff > 0 ? '#FEE2E2' : '#D1FAE5') : '';
+        
+        html += '<tr style="background: ' + rowColor + ';">';
+        html += '<td><strong>' + item1.name + '</strong></td>';
+        html += '<td style="text-align: center;"><strong>' + item1.qty + '</strong><br><small>$' + item1.cost.toFixed(2) + '</small></td>';
+        html += '<td style="text-align: center;"><strong>' + item2.qty + '</strong><br><small>$' + item2.cost.toFixed(2) + '</small></td>';
+        html += '<td style="text-align: center; font-weight: bold; color: ' + (qtyDiff > 0 ? '#EF4444' : qtyDiff < 0 ? '#10B981' : '#6B7280') + ';">';
+        html += (qtyDiff > 0 ? '+' : '') + qtyDiff + '</td>';
+        html += '<td style="text-align: center; font-weight: bold;">' + (changePercent > 0 ? '+' : '') + changePercent.toFixed(1) + '%</td>';
+        html += '</tr>';
+      });
+      
+      html += '</tbody></table>';
+      
+      // Insights
+      html += '<div style="background: #F3F4F6; padding: 20px; border-radius: 10px; margin-top: 30px;">';
+      html += '<h4 style="margin-top: 0;">💡 Insights:</h4>';
+      html += '<ul style="line-height: 1.8;">';
+      
+      if (period1.totalCost > period2.totalCost) {
+        html += '<li>Period 1 had <strong style="color: #EF4444;">higher consumption</strong> by $' + diff.toFixed(2) + ' (' + diffPercent.toFixed(1) + '%)</li>';
+      } else if (period1.totalCost < period2.totalCost) {
+        html += '<li>Period 1 had <strong style="color: #10B981;">lower consumption</strong> by $' + Math.abs(diff).toFixed(2) + ' (' + Math.abs(diffPercent).toFixed(1) + '%)</li>';
+      } else {
+        html += '<li>Both periods had <strong>equal consumption</strong></li>';
+      }
+      
+      const days1 = Math.ceil((period1End - period1Start) / (1000 * 60 * 60 * 24));
+      const days2 = Math.ceil((period2End - period2Start) / (1000 * 60 * 60 * 24));
+      const avgPerDay1 = period1.totalCost / days1;
+      const avgPerDay2 = period2.totalCost / days2;
+      
+      html += '<li>Period 1: <strong>$' + avgPerDay1.toFixed(2) + '/day</strong> over ' + days1 + ' days</li>';
+      html += '<li>Period 2: <strong>$' + avgPerDay2.toFixed(2) + '/day</strong> over ' + days2 + ' days</li>';
+      html += '<li>Total items tracked: <strong>' + allItems.size + '</strong></li>';
+      
+      html += '</ul></div>';
+      
+      document.getElementById('comparisonResult').innerHTML = html;
+    }
+    
+    function showPrediction() {
+      let result = '<h3>📊 Predicted Needs (Next 6 Months)</h3><div style="margin-top: 20px;">';
+      let totalCost = 0;
+      
+      // Simple prediction: items used in completed requests
+      let usage = {};
+      requests.forEach(req => {
+        if (req.status === 'Completed') {
+          req.items.forEach(item => {
+            if (!usage[item.itemCode]) usage[item.itemCode] = { name: item.itemName, qty: 0 };
+            usage[item.itemCode].qty += (item.approvedQty || item.requestedQty || 0);
+          });
+        }
+      });
+      
+      // Calculate predictions
+      let predictions = [];
+      for (let code in usage) {
+        let inv = inventory.find(i => i.code === code);
+        if (inv) {
+          let monthlyUse = Math.ceil(usage[code].qty / 6); // Assume 6 months of data
+          let predicted = monthlyUse * 6;
+          let needToOrder = Math.max(0, predicted - inv.qty);
+          if (needToOrder > 0) {
+            predictions.push({
+              name: usage[code].name,
+              current: inv.qty,
+              need: predicted,
+              order: needToOrder,
+              cost: needToOrder * inv.price
+            });
+            totalCost += needToOrder * inv.price;
+          }
+        }
+      }
+      
+      if (predictions.length === 0) {
+        result += '<p style="text-align: center; padding: 40px; color: #10B981;">✓ You have enough stock!</p>';
+      } else {
+        result += '<div style="background: #6366F1; color: white; padding: 30px; border-radius: 10px; text-align: center; margin-bottom: 20px;">';
+        result += '<h2 style="color: white; margin: 0;">$' + totalCost.toFixed(0) + '</h2>';
+        result += '<p>Total Budget Needed</p></div>';
+        
+        result += '<table><thead><tr><th>Item</th><th>Current</th><th>Predicted Need</th><th>Order</th><th>Cost</th></tr></thead><tbody>';
+        predictions.forEach(p => {
+          result += '<tr><td><strong>' + p.name + '</strong></td>';
+          result += '<td>' + p.current + '</td><td>' + p.need + '</td>';
+          result += '<td><strong style="color: #EF4444;">' + p.order + '</strong></td>';
+          result += '<td>$' + p.cost.toFixed(2) + '</td></tr>';
+        });
+        result += '</tbody></table>';
+      }
+      
+      result += '</div>';
+      document.getElementById('predictionResult').innerHTML = result;
+    }
+
+  </script>
+
+</body>
+</html>
